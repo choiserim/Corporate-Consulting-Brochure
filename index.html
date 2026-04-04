@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLAN_A Expert Group | 기업 통합 마스터플랜 & 전문가 네트워크</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/scrollreveal"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; scroll-behavior: smooth; word-break: keep-all; }
+        .glass-nav { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        
+        section { min-height: 80vh; display: flex; align-items: center; }
+        .step-card { 
+            border-radius: 3rem; 
+            overflow: hidden;
+            width: 100%;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .badge { display: inline-block; padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 1rem; }
+        
+        .step-num { 
+            font-size: 10rem; 
+            font-weight: 900; 
+            line-height: 1; 
+            opacity: 0.03; 
+            position: absolute; 
+            right: 2rem; 
+            top: 0; 
+            pointer-events: none; 
+            user-select: none;
+        }
+        
+        .process-line { position: relative; }
+        .process-line::before { 
+            content: ''; 
+            position: absolute; 
+            left: 50%; 
+            top: 50px; 
+            bottom: 50px; 
+            width: 2px; 
+            background: linear-gradient(to bottom, #3b82f6 0%, #10b981 33%, #f59e0b 66%, #1e293b 100%); 
+            transform: translateX(-50%); 
+            z-index: 0; 
+            opacity: 0.1;
+        }
+        @media (max-width: 1024px) { .process-line::before { display: none; } }
+
+        .expert-node { height: 100%; }
+        .text-gradient {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .float-icon { animation: float 3s ease-in-out infinite; }
+
+        .input-group input {
+            width: 100%;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1e293b;
+            outline: none;
+        }
+
+        .flow-container { position: relative; width: 100%; }
+        .flow-line-horizontal {
+            position: absolute;
+            top: 48px; 
+            left: 5%;
+            right: 5%;
+            height: 2px;
+            background-color: #f1f5f9;
+            z-index: 0;
+        }
+
+        .flow-box {
+            width: 96px;
+            height: 96px;
+            border-width: 3px;
+            border-style: solid;
+            border-radius: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 1.5rem;
+            position: relative;
+            z-index: 10;
+            color: white !important;
+        }
+
+        .step-blue { border-color: #3b82f6; background-color: #3b82f6; }
+        .step-cyan { border-color: #06b6d4; background-color: #06b6d4; }
+        .step-purple { border-color: #8b5cf6; background-color: #8b5cf6; }
+        .step-pink { border-color: #ec4899; background-color: #ec4899; }
+        .step-emerald { border-color: #10b981; background-color: #10b981; }
+
+        .flow-box-highlight {
+            box-shadow: 0 20px 25px -5px rgba(139, 92, 246, 0.4);
+            transform: scale(1.1);
+        }
+
+        .text-step-blue { color: #2563eb; }
+        .text-step-cyan { color: #0891b2; }
+        .text-step-purple { color: #7c3aed; }
+        .text-step-pink { color: #db2777; }
+        .text-step-emerald { color: #059669; }
+
+        @media (max-width: 1024px) { .flow-line-horizontal { display: none; } }
+
+        /* 버튼 호버 애니메이션 */
+        .btn-hover-effect {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-hover-effect:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+            box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 selection:bg-blue-100 selection:text-blue-700">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-[100] glass-nav">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <a href="#" class="text-2xl font-black text-blue-700 tracking-tighter flex items-center gap-2">
+                    <span class="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-white text-base">P</span>
+                    PLAN_A <span class="text-slate-500 font-bold text-lg hidden sm:inline">EXPERT GROUP</span>
+                </a>
+            </div>
+            <div class="hidden lg:flex gap-6 text-[12px] font-black text-slate-500 uppercase tracking-widest">
+                <a href="#analysis">실시간 진단</a>
+                <a href="#step1">01 도입기</a>
+                <a href="#step2">02 성장기</a>
+                <a href="#step3">03 성숙기</a>
+                <a href="#step4">04 LEGACY</a>
+                <a href="#experts">전문가 그룹</a>
+                <a href="#flow" class="text-blue-700">밀착 케어</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="tel:010-7526-1826" class="bg-blue-700 text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-lg shadow-blue-200 active:scale-95 btn-hover-effect flex items-center gap-2">
+                    <i class="fa-solid fa-phone text-[10px]"></i>
+                    전문가 솔루션 신청
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative min-h-screen flex items-center pt-20 px-6 overflow-hidden">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none">
+            <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[60%] bg-blue-100/40 blur-[120px] rounded-full"></div>
+            <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-emerald-100/40 blur-[120px] rounded-full"></div>
+        </div>
+        
+        <div class="max-w-5xl mx-auto text-center reveal">
+            <div class="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-slate-200 shadow-sm mb-8">
+                <span class="flex h-2 w-2 rounded-full bg-blue-600 animate-pulse"></span>
+                <span class="text-xs font-black text-slate-600 tracking-wider">대한민국 TOP 1% 기업 컨설턴트 네트워크</span>
+            </div>
+            <h1 class="text-5xl md:text-8xl font-black text-slate-900 leading-[1.1] mb-10 tracking-tight">
+                기업의 내일을 설계하는<br><span class="text-gradient">통합 마스터플랜</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-500 font-medium leading-relaxed max-w-3xl mx-auto mb-12">
+                기업 설립에서 법인 전환/가업 승계까지, 단계별 최적의 솔루션으로 귀사의 가치를 극대화하고 경영 리스크를 원천 차단합니다.
+            </p>
+            <a href="tel:010-7526-1826" class="inline-flex items-center gap-3 bg-slate-900 text-white px-10 py-5 rounded-2xl font-black text-lg shadow-2xl btn-hover-effect">
+                <i class="fa-solid fa-phone"></i>
+                지금 전문가 직통 상담
+            </a>
+        </div>
+    </header>
+
+    <!-- 실시간 경영 진단 섹션 -->
+    <section id="analysis" class="py-32 px-6">
+        <div class="max-w-7xl mx-auto w-full">
+            <div class="mb-12 reveal text-center lg:text-left">
+                <span class="badge bg-blue-600 text-white">Live System</span>
+                <h2 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">재무 상태 정밀 진단</h2>
+                <p class="text-slate-500 mt-2 font-bold text-sm">* 영업손실이나 자본잠식은 숫자 앞에 마이너스(-)를 입력하세요.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+                <!-- Inputs -->
+                <div class="lg:col-span-4 bg-white p-8 rounded-[3rem] shadow-xl border border-slate-100 reveal">
+                    <h4 class="text-lg font-black text-slate-900 mb-8 flex items-center gap-2">
+                        <i class="fa-solid fa-money-bill-transfer text-blue-600"></i> 데이터 입력 (원)
+                    </h4>
+                    <div class="space-y-6">
+                        <div class="input-group">
+                            <label class="text-xs font-bold text-slate-400 uppercase mb-2 block">연간 매출액 (원)</label>
+                            <input type="text" id="in_rev_2023" value="100,000,000,000" oninput="handleInput(this)">
+                            <span id="txt_rev_2023" class="unit-display"></span>
+                        </div>
+                        <div class="input-group">
+                            <label class="text-xs font-bold text-slate-400 uppercase mb-2 block">연간 영업이익 (원)</label>
+                            <input type="text" id="in_pft_2023" value="5,000,000,000" oninput="handleInput(this)">
+                            <span id="txt_pft_2023" class="unit-display"></span>
+                        </div>
+                        <div class="input-group">
+                            <label class="text-xs font-bold text-slate-400 uppercase mb-2 block">총 부채 (원)</label>
+                            <input type="text" id="in_debt" value="40,000,000,000" oninput="handleInput(this)">
+                            <span id="txt_debt" class="unit-display"></span>
+                        </div>
+                        <div class="input-group">
+                            <label class="text-xs font-bold text-slate-400 uppercase mb-2 block">자기 자본 (원)</label>
+                            <input type="text" id="in_equity" value="20,000,000,000" oninput="handleInput(this)">
+                            <span id="txt_equity" class="unit-display"></span>
+                        </div>
+                        <div class="input-group">
+                            <label class="text-xs font-bold text-slate-400 uppercase mb-2 block">가지급금 (원)</label>
+                            <input type="text" id="in_suspense" value="150,000,000" oninput="handleInput(this)">
+                            <span id="txt_suspense" class="unit-display"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-8 reveal">
+                    <div class="bg-white p-8 rounded-[3rem] shadow-xl border border-slate-100 flex flex-col">
+                        <h4 class="text-sm font-black text-slate-900 mb-6 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-blue-600"></i> 경영 지표 그래프 (단위: 억/%)
+                        </h4>
+                        <div class="flex-1 min-h-[300px]">
+                            <canvas id="analysisChart"></canvas>
+                        </div>
+                        <div class="mt-8 space-y-6">
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-2">
+                                    <span>부채비율</span>
+                                    <span id="v_debt_txt" class="text-rose-600">0%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                    <div id="v_debt_bar" class="bg-rose-500 h-full"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-2">
+                                    <span>영업이익률</span>
+                                    <span id="v_margin_txt" class="text-blue-600">0%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                    <div id="v_margin_bar" class="bg-blue-500 h-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 p-10 rounded-[3rem] shadow-2xl text-white flex flex-col">
+                        <h4 class="text-xs font-bold text-slate-400 mb-8 uppercase tracking-widest">자동 진단 리포트</h4>
+                        <div class="space-y-8 flex-1">
+                            <div class="flex items-start gap-5">
+                                <div id="icon_risk" class="w-10 h-10 rounded-xl bg-blue-500 flex-shrink-0 flex items-center justify-center text-lg font-bold">!</div>
+                                <div>
+                                    <h5 class="text-base font-black mb-1">재무 안정성</h5>
+                                    <p class="text-xs font-medium text-slate-400 leading-relaxed" id="report_risk">데이터를 분석 중입니다...</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-5">
+                                <div id="icon_margin" class="w-10 h-10 rounded-xl bg-blue-500 flex-shrink-0 flex items-center justify-center text-lg font-bold">%</div>
+                                <div>
+                                    <h5 class="text-base font-black mb-1">수익성 (영업이익률)</h5>
+                                    <p class="text-xs font-medium text-slate-400 leading-relaxed" id="report_margin">영업이익률 분석 중입니다...</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-5">
+                                <div id="icon_cash" class="w-10 h-10 rounded-xl bg-blue-500 flex-shrink-0 flex items-center justify-center text-lg font-bold">!</div>
+                                <div>
+                                    <h5 class="text-base font-black mb-1">세무 리스크</h5>
+                                    <p class="text-xs font-medium text-slate-400 leading-relaxed" id="report_cash">데이터를 분석 중입니다...</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-5">
+                                <div id="icon_advice" class="w-10 h-10 rounded-xl bg-blue-500 flex-shrink-0 flex items-center justify-center text-lg font-bold">i</div>
+                                <div>
+                                    <h5 class="text-base font-black mb-1">컨설팅 제언</h5>
+                                    <p class="text-xs font-medium text-slate-400 leading-relaxed italic" id="report_advice">데이터를 분석 중입니다...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="tel:010-7526-1826" class="w-full mt-10 bg-blue-600 py-5 rounded-2xl font-black text-sm text-center btn-hover-effect flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-phone"></i> 무료 대면 상담 신청
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content (Process Steps) -->
+    <main class="max-w-7xl mx-auto px-6 py-20 space-y-40 process-line">
+
+        <!-- STEP 01: 도입기 -->
+        <section id="step1" class="relative z-10 reveal pt-20 -mt-20">
+            <div class="step-card bg-white p-10 md:p-20 shadow-2xl border border-slate-100">
+                <span class="step-num text-blue-600">01</span>
+                <div class="grid lg:grid-cols-12 gap-16 items-start">
+                    <div class="lg:col-span-5">
+                        <span class="badge bg-blue-100 text-blue-600">Foundation Stage</span>
+                        <h2 class="text-4xl md:text-5xl font-black mb-8 text-slate-900 tracking-tight">도입기:<br>안정적 기반 구축</h2>
+                        <p class="text-lg text-slate-500 font-medium mb-12 leading-relaxed">
+                            기업 초기 3년은 정부 지원 혜택을 선점하고 대표자의 경영 리스크를 방어하는 가장 중요한 <strong>골든타임</strong>입니다.
+                        </p>
+                        <div class="bg-blue-50/50 p-8 rounded-[2rem] border border-blue-100 mb-8">
+                            <h4 class="font-black text-slate-900 mb-6 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie text-blue-600"></i> 도입기 핵심 전략 지표
+                            </h4>
+                            <ul class="space-y-4 text-sm font-bold text-slate-600">
+                                <li class="flex justify-between items-center border-b border-blue-100 pb-3"><span>법인세 감면율</span> <span class="text-blue-700 text-lg">최대 100%</span></li>
+                                <li class="flex justify-between items-center border-b border-blue-100 pb-3"><span>정책자금 가점</span> <span class="text-blue-700">벤처인증 필수</span></li>
+                                <li class="flex justify-between items-center"><span>CEO 리스크 방어</span> <span class="text-blue-700">보험료 손비처리</span></li>
+                            </ul>
+                        </div>
+                        <a href="tel:010-7526-1826" class="w-full bg-blue-700 text-white py-5 rounded-2xl font-black text-center btn-hover-effect flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-phone"></i> 도입기 솔루션 신청
+                        </a>
+                    </div>
+                    <div class="lg:col-span-7 grid sm:grid-cols-2 gap-6">
+                        <div class="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6">
+                                <i class="fa-solid fa-percent text-2xl text-blue-600"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-4">창업세액감면</h3>
+                            <p class="text-slate-500 text-sm font-medium leading-relaxed italic">지역/연령 조건 분석을 통한 5년간 법인세 50~100% 감면 설계</p>
+                        </div>
+                        <div class="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6">
+                                <i class="fa-solid fa-certificate text-2xl text-blue-600"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-4">벤처기업인증</h3>
+                            <p class="text-slate-500 text-sm font-medium leading-relaxed italic">혁신성장형 인증을 통한 세제 혜택 및 금융 지원 우대 확보</p>
+                        </div>
+                        <div class="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6">
+                                <i class="fa-solid fa-shield-halved text-2xl text-blue-600"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-4">경영인 정기보험</h3>
+                            <p class="text-slate-500 text-sm font-medium leading-relaxed italic">유사시 경영권 보호 자금 마련 및 보험료 전액 비용 처리</p>
+                        </div>
+                        <div class="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6">
+                                <i class="fa-solid fa-file-contract text-2xl text-blue-600"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-4">정관 정비</h3>
+                            <p class="text-slate-500 text-sm font-medium leading-relaxed italic">임원 보수 규정 및 퇴직금 지급 근거 마련을 통한 법적 안정성</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 02: 성장기 -->
+        <section id="step2" class="relative z-10 reveal pt-20 -mt-20">
+            <div class="step-card bg-white p-10 md:p-20 shadow-2xl border border-slate-100">
+                <span class="step-num text-emerald-600">02</span>
+                <div class="grid lg:grid-cols-12 gap-16 items-start">
+                    <div class="lg:col-span-5 lg:order-2">
+                        <span class="badge bg-emerald-100 text-emerald-600">Growth Stage</span>
+                        <h2 class="text-4xl md:text-5xl font-black mb-8 text-slate-900 tracking-tight">성장기:<br>이익 설계 및 인재 확보</h2>
+                        <p class="text-lg text-slate-500 font-medium mb-12 leading-relaxed">
+                            매출이 본궤도에 오르는 시기입니다. 불필요한 세무 리스크를 선제적으로 관리하고 핵심 인재를 위한 보상 체계를 구축합니다.
+                        </p>
+                        <div class="bg-emerald-50/50 p-8 rounded-[2rem] border border-emerald-100 mb-8">
+                            <h4 class="font-black text-slate-900 mb-6 flex items-center gap-2">
+                                <i class="fa-solid fa-microchip text-emerald-600"></i> 기술 경영 핵심 지표
+                            </h4>
+                            <ul class="space-y-4 text-sm font-bold text-slate-600">
+                                <li class="flex justify-between items-center border-b border-emerald-100 pb-3"><span>R&D 세액공제</span> <span class="text-emerald-700 text-lg">당기분 25%</span></li>
+                                <li class="flex justify-between items-center border-b border-emerald-100 pb-3"><span>핵심 인력 보상</span> <span class="text-emerald-700">성과보상기금</span></li>
+                                <li class="flex justify-between items-center"><span>기업부설연구소</span> <span class="text-emerald-700">세제 혜택 극대화</span></li>
+                            </ul>
+                        </div>
+                        <a href="tel:010-7526-1826" class="w-full bg-emerald-600 text-white py-5 rounded-2xl font-black text-center btn-hover-effect flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-phone"></i> 성장기 컨설팅 연결
+                        </a>
+                    </div>
+                    <div class="lg:col-span-7 lg:order-1 grid sm:grid-cols-2 gap-6">
+                        <div class="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6">
+                                <i class="fa-solid fa-flask text-2xl text-emerald-600"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-4">연구소/전담부서</h3>
+                            <p class="text-slate-500 text-sm font-medium leading-relaxed italic">연구원 인건비 세액 공제를 통한 실질적인 법인세 절감 솔루션</p>
+                        </div>
+                        <div class="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6">
+                                <i class="fa-solid fa-users-gear text-2xl text-emerald-600"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-4">사내근로복지기금</h3>
+                            <p class="text-slate-500 text-sm font-medium leading-relaxed italic">임직원 복지 향상과 법인의 비용 처리, 증여세 절감을 동시에 달성</p>
+                        </div>
+                        <div class="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6">
+                                <i class="fa-solid fa-chart-line text-2xl text-emerald-600"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-4">가지급금 정리</h3>
+                            <p class="text-slate-500 text-sm font-medium leading-relaxed italic">불필요한 인정이자 발생 및 법인세 증가 원인인 가지급금 조기 해소</p>
+                        </div>
+                        <div class="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6">
+                                <i class="fa-solid fa-award text-2xl text-emerald-600"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-4">직무발명보상제도</h3>
+                            <p class="text-slate-500 text-sm font-medium leading-relaxed italic">임직원 발명 의욕 고취 및 보상금에 대한 비과세 혜택 설계</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 03: 성숙기 -->
+        <section id="step3" class="relative z-10 reveal pt-20 -mt-20">
+            <div class="step-card bg-white p-10 md:p-20 shadow-2xl border border-slate-100">
+                <span class="step-num text-orange-600">03</span>
+                <div class="grid lg:grid-cols-12 gap-16 items-start">
+                    <div class="lg:col-span-5">
+                        <span class="badge bg-orange-100 text-orange-600">Maturity Stage</span>
+                        <h2 class="text-4xl md:text-5xl font-black mb-8 text-slate-900 tracking-tight">성숙기:<br>자산 효율화 및 주주 환원</h2>
+                        <p class="text-lg text-slate-500 font-medium mb-12 leading-relaxed">
+                            누적된 이익잉여금을 효율적으로 활용하고, 정교한 기업 가치 평가를 통해 주주 중심의 이익 분배 구조를 최적화할 때입니다.
+                        </p>
+                        <div class="bg-orange-50/50 p-8 rounded-[2rem] border border-orange-100 mb-8">
+                            <h4 class="font-black text-slate-900 mb-6 flex items-center gap-2">
+                                <i class="fa-solid fa-coins text-orange-600"></i> 자산 최적화 지표
+                            </h4>
+                            <ul class="space-y-4 text-sm font-bold text-slate-600">
+                                <li class="flex justify-between items-center border-b border-orange-100 pb-3"><span>자사주 매입</span> <span class="text-orange-700 text-lg">배당 대비 절세</span></li>
+                                <li class="flex justify-between items-center border-b border-orange-100 pb-3"><span>이익소각</span> <span class="text-orange-700">의제배당 리스크 관리</span></li>
+                                <li class="flex justify-between items-center"><span>미처분잉여금</span> <span class="text-orange-700">EXIT 전략 수립</span></li>
+                            </ul>
+                        </div>
+                        <a href="tel:010-7526-1826" class="w-full bg-orange-600 text-white py-5 rounded-2xl font-black text-center btn-hover-effect flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-phone"></i> 성숙기 리스크 상담
+                        </a>
+                    </div>
+                    <div class="lg:col-span-7 grid sm:grid-cols-2 gap-6">
+                        <div class="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6">
+                                <i class="fa-solid fa-sack-dollar text-2xl text-orange-600"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-4">차등 배당 전략</h3>
+                            <p class="text-slate-500 text-sm font-medium leading-relaxed italic">자녀 등 하위 주주에게 배당을 집중하여 소득 분산 및 증여 효과 극대화</p>
+                        </div>
+                        <div class="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6">
+                                <i class="fa-solid fa-arrows-rotate text-2xl text-orange-600"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-4">자기주식 소각</h3>
+                            <p class="text-slate-500 text-sm font-medium leading-relaxed italic">법인 자금을 활용한 주식 가치 제고 및 효율적인 잉여금 엑시트</p>
+                        </div>
+                        <div class="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6">
+                                <i class="fa-solid fa-chart-simple text-2xl text-orange-600"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-4">기업 가치 관리</h3>
+                            <p class="text-slate-500 text-sm font-medium leading-relaxed italic">비상장주식 평가를 통한 증여/양도 시점의 전략적 선택 및 리스크 관리</p>
+                        </div>
+                        <div class="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6">
+                                <i class="fa-solid fa-hand-holding-heart text-2xl text-orange-600"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-4">가업승계 준비</h3>
+                            <p class="text-slate-500 text-sm font-medium leading-relaxed italic">사전 증여 및 승계 요건 충족 여부 상시 모니터링 체계 가동</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 04: LEGACY -->
+        <section id="step4" class="relative z-10 reveal pt-20 -mt-20">
+            <div class="step-card bg-slate-900 p-10 md:p-20 shadow-2xl text-white">
+                <span class="step-num text-white opacity-10">04</span>
+                <div class="grid lg:grid-cols-12 gap-16 items-start">
+                    <div class="lg:col-span-5">
+                        <span class="badge bg-blue-600 text-white">Legacy Stage</span>
+                        <h2 class="text-4xl md:text-5xl font-black mb-8 tracking-tight">LEGACY:<br>기업의 영속성 확보</h2>
+                        <p class="text-lg text-slate-400 font-medium mb-12 leading-relaxed">
+                            수십 년간 일궈온 기업의 가치를 온전하게 다음 세대로 전수합니다. 막대한 상속세를 합법적으로 최소화하는 마지막 관문입니다.
+                        </p>
+                        <div class="bg-slate-800 p-8 rounded-[2rem] border border-slate-700 mb-8">
+                            <h4 class="font-black text-white mb-6 flex items-center gap-2">
+                                <i class="fa-solid fa-crown text-yellow-400"></i> 승계 핵심 전략 지표
+                            </h4>
+                            <ul class="space-y-4 text-sm font-bold text-slate-300">
+                                <li class="flex justify-between items-center border-b border-slate-700 pb-3"><span>가업상속공제</span> <span class="text-blue-400 text-lg">최대 600억</span></li>
+                                <li class="flex justify-between items-center border-b border-slate-700 pb-3"><span>증여세 특례</span> <span class="text-blue-400">저율 과세(10~20%)</span></li>
+                                <li class="flex justify-between items-center"><span>사후 관리</span> <span class="text-blue-400">5년 고용 유지 필수</span></li>
+                            </ul>
+                        </div>
+                        <a href="tel:010-7526-1826" class="w-full bg-white text-slate-900 py-5 rounded-2xl font-black text-center btn-hover-effect flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-phone"></i> 영속성 강화 전략 신청
+                        </a>
+                    </div>
+                    <div class="lg:col-span-7 grid sm:grid-cols-2 gap-6">
+                        <div class="p-10 bg-slate-800 border border-slate-700 rounded-[2.5rem]">
+                            <div class="w-14 h-14 bg-slate-700 rounded-2xl flex items-center justify-center mb-6">
+                                <i class="fa-solid fa-briefcase text-2xl text-blue-400"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-4">가업승계 특례</h3>
+                            <p class="text-slate-400 text-sm font-medium leading-relaxed italic">강화된 세법 요건에 맞춘 철저한 사전 준비로 승계 비용 90% 이상 절감</p>
+                        </div>
+                        <div class="p-10 bg-slate-800 border border-slate-700 rounded-[2.5rem]">
+                            <div class="w-14 h-14 bg-slate-700 rounded-2xl flex items-center justify-center mb-6">
+                                <i class="fa-solid fa-scale-balanced text-2xl text-blue-400"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-4">법인 분할/합병</h3>
+                            <p class="text-slate-400 text-sm font-medium leading-relaxed italic">사업 구조 재편을 통한 승계 타겟 주식 가치의 전략적 조정 및 효율화</p>
+                        </div>
+                        <div class="p-10 bg-slate-800 border border-slate-700 rounded-[2.5rem]">
+                            <div class="w-14 h-14 bg-slate-700 rounded-2xl flex items-center justify-center mb-6">
+                                <i class="fa-solid fa-handshake-angle text-2xl text-blue-400"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-4">공익법인 활용</h3>
+                            <p class="text-slate-400 text-sm font-medium leading-relaxed italic">사회 환원과 경영권 방어를 동시에 달성하는 공익법인 설립 전략</p>
+                        </div>
+                        <div class="p-10 bg-slate-800 border border-slate-700 rounded-[2.5rem]">
+                            <div class="w-14 h-14 bg-slate-700 rounded-2xl flex items-center justify-center mb-6">
+                                <i class="fa-solid fa-file-invoice-dollar text-2xl text-blue-400"></i>
+                            </div>
+                            <h3 class="text-xl font-black mb-4">상속세 재원 마련</h3>
+                            <p class="text-slate-400 text-sm font-medium leading-relaxed italic">현금 흐름 설계를 통한 상속세 납부 재원 확보로 급격한 자산 매각 방지</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Expert Group Section -->
+    <section id="experts" class="bg-slate-900 py-32 px-6 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 blur-[150px] rounded-full"></div>
+        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-600/10 blur-[150px] rounded-full"></div>
+
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="text-center mb-24 reveal">
+                <h2 class="text-blue-500 font-black tracking-[0.2em] text-sm uppercase mb-6">Strategic Collaboration</h2>
+                <h2 class="text-4xl md:text-6xl font-black mb-8 text-white tracking-tight">5대 전문가 그룹 통합 프로세스</h2>
+                <p class="text-slate-400 text-xl max-w-3xl mx-auto leading-relaxed font-medium">
+                    분절된 컨설팅은 오히려 리스크를 키웁니다. 세무, 노무, 법무가 하나의 목표를 향해 움직일 때 기업의 가치는 비로소 완성됩니다.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                <div class="expert-node bg-slate-800/50 backdrop-blur-sm p-8 rounded-[3rem] border border-slate-700 reveal">
+                    <div class="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center mb-8 shadow-xl float-icon">
+                        <i class="fa-solid fa-calculator text-xl"></i>
+                    </div>
+                    <div class="text-xs font-black text-blue-400 mb-2 uppercase">Step 01. Tax</div>
+                    <h3 class="text-lg font-black mb-4 text-white">세무 리스크 진단</h3>
+                    <p class="text-xs text-slate-400 font-medium leading-relaxed">결산서 분석을 통해 잠재적 세무 리스크를 도출합니다.</p>
+                </div>
+                <div class="expert-node bg-slate-800/50 backdrop-blur-sm p-8 rounded-[3rem] border border-slate-700 reveal" style="transition-delay: 0.1s">
+                    <div class="w-14 h-14 bg-emerald-600 text-white rounded-2xl flex items-center justify-center mb-8 shadow-xl float-icon">
+                        <i class="fa-solid fa-users-gear text-xl"></i>
+                    </div>
+                    <div class="text-xs font-black text-emerald-400 mb-2 uppercase">Step 02. Labor</div>
+                    <h3 class="text-lg font-black mb-4 text-white">인사 노무 정비</h3>
+                    <p class="text-xs text-slate-400 font-medium leading-relaxed">근로계약 및 취업규칙을 법적 기준에 맞춰 재설계합니다.</p>
+                </div>
+                <div class="expert-node bg-slate-800/50 backdrop-blur-sm p-8 rounded-[3rem] border border-slate-700 reveal" style="transition-delay: 0.2s">
+                    <div class="w-14 h-14 bg-amber-600 text-white rounded-2xl flex items-center justify-center mb-8 shadow-xl float-icon">
+                        <i class="fa-solid fa-gavel text-xl"></i>
+                    </div>
+                    <div class="text-xs font-black text-amber-400 mb-2 uppercase">Step 03. Legal</div>
+                    <h3 class="text-lg font-black mb-4 text-white">법무/정관 고도화</h3>
+                    <p class="text-xs text-slate-400 font-medium leading-relaxed">상법 개정안을 반영하여 정관을 최적화하고 경영권을 방어합니다.</p>
+                </div>
+                <div class="expert-node bg-slate-800/50 backdrop-blur-sm p-8 rounded-[3rem] border border-slate-700 reveal" style="transition-delay: 0.3s">
+                    <div class="w-14 h-14 bg-rose-600 text-white rounded-2xl flex items-center justify-center mb-8 shadow-xl float-icon">
+                        <i class="fa-solid fa-helmet-safety text-xl"></i>
+                    </div>
+                    <div class="text-xs font-black text-rose-400 mb-2 uppercase">Step 04. Safety</div>
+                    <h3 class="text-lg font-black mb-4 text-white">산업안전 체계</h3>
+                    <p class="text-xs text-slate-400 font-medium leading-relaxed">중대재해처벌법 대응을 위한 안전 보건 체계를 구축합니다.</p>
+                </div>
+                <div class="expert-node bg-slate-800/50 backdrop-blur-sm p-8 rounded-[3rem] border border-slate-700 reveal" style="transition-delay: 0.4s">
+                    <div class="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center mb-8 shadow-xl float-icon">
+                        <i class="fa-solid fa-medal text-xl"></i>
+                    </div>
+                    <div class="text-xs font-black text-indigo-400 mb-2 uppercase">Step 05. Value UP</div>
+                    <h3 class="text-lg font-black mb-4 text-white">인증 및 가치 제고</h3>
+                    <p class="text-xs text-slate-400 font-medium leading-relaxed">국가 인증 취득을 통해 대외 신인도와 기업 가치를 극대화합니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Consulting Flow Section -->
+    <section id="flow" class="py-40 px-6 bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-32 reveal">
+                <span class="badge bg-blue-600 text-white">Consulting Flow</span>
+                <h2 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mt-4">전문가 밀착 케어 프로세스</h2>
+                <p class="text-slate-400 mt-6 font-medium text-lg">PLAN_A Expert Group은 결과가 나올 때까지 멈추지 않습니다.</p>
+            </div>
+
+            <div class="flow-container">
+                <div class="flow-line-horizontal"></div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-16 lg:gap-4 relative z-10">
+                    
+                    <div class="text-center reveal">
+                        <div class="flow-box step-blue">
+                            <i class="fa-solid fa-magnifying-glass-chart"></i>
+                        </div>
+                        <h4 class="text-xl font-black mb-3 text-step-blue">사전 진단</h4>
+                        <p class="text-sm text-slate-500 font-bold leading-relaxed">기업 컨디션 및<br>재무제표 정밀 분석</p>
+                    </div>
+
+                    <div class="text-center reveal" style="transition-delay: 0.1s">
+                        <div class="flow-box step-cyan">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <h4 class="text-xl font-black mb-3 text-step-cyan">이슈 도출</h4>
+                        <p class="text-sm text-slate-500 font-bold leading-relaxed">잠재적 리스크 및<br>절세 포인트 발견</p>
+                    </div>
+
+                    <div class="text-center reveal" style="transition-delay: 0.2s">
+                        <div class="flow-box step-purple flow-box-highlight">
+                            <i class="fa-solid fa-pen-ruler"></i>
+                        </div>
+                        <h4 class="text-xl font-black mb-3 text-step-purple">솔루션 설계</h4>
+                        <p class="text-sm text-slate-600 font-black leading-relaxed px-4 py-2 bg-purple-50 rounded-xl inline-block border border-purple-100">전문가 그룹의<br>맞춤형 최적화 전략</p>
+                    </div>
+
+                    <div class="text-center reveal" style="transition-delay: 0.3s">
+                        <div class="flow-box step-pink">
+                            <i class="fa-solid fa-handshake"></i>
+                        </div>
+                        <h4 class="text-xl font-black mb-3 text-step-pink">실행 지원</h4>
+                        <p class="text-sm text-slate-500 font-bold leading-relaxed">실무 프로세스 및<br>법적 대행 동행</p>
+                    </div>
+
+                    <div class="text-center reveal" style="transition-delay: 0.4s">
+                        <div class="flow-box step-emerald">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <h4 class="text-xl font-black mb-3 text-step-emerald">사후 관리</h4>
+                        <p class="text-sm text-slate-500 font-bold leading-relaxed">지속적인 모니터링 및<br>업데이트</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 최종 상담 유도 메시지 -->
+            <div class="mt-40 p-12 md:p-24 bg-slate-900 rounded-[4rem] text-center text-white reveal relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-600/20 blur-[120px] rounded-full -z-0"></div>
+                <div class="relative z-10">
+                    <h3 class="text-3xl md:text-5xl font-black mb-8 leading-tight">
+                        "대표님의 시간은 소중합니다.<br>리스크 관리는 전문가에게 맡기십시오."
+                    </h3>
+                    <p class="text-xl text-slate-400 font-medium mb-12">
+                        대표님의 기업 생애주기에 맞춘<br> '전문가 그룹 통합 진단 보고서'를 제공해 드립니다.
+                    </p>
+                    <a href="tel:010-7526-1826" class="inline-flex items-center gap-3 bg-blue-600 px-12 py-6 rounded-2xl font-black text-xl btn-hover-effect">
+                        <i class="fa-solid fa-phone"></i> 전문가 솔루션 신청
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating Call Button for Mobile -->
+    <a href="tel:010-7526-1826" class="lg:hidden fixed bottom-6 right-6 w-16 h-16 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl z-[100] animate-bounce">
+        <i class="fa-solid fa-phone"></i>
+    </a>
+
+    <script>
+        let mainChartInstance = null;
+
+        function formatWithComma(val) {
+            const isNegative = val.startsWith('-');
+            let numeric = val.replace(/[^0-9]/g, '');
+            let formatted = numeric.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            return (isNegative && (numeric.length > 0 || val === '-')) ? '-' + formatted : formatted;
+        }
+
+        function formatCombinedUnit(num) {
+            if (num === 0) return "0원";
+            const isNegative = num < 0;
+            const absoluteNum = Math.abs(num);
+            const fullNumStr = (isNegative ? "-" : "") + absoluteNum.toLocaleString() + "원";
+            const eok = Math.floor(absoluteNum / 100000000);
+            const man = Math.floor((absoluteNum % 100000000) / 10000);
+            let korStr = "";
+            if (eok > 0) korStr += eok.toLocaleString() + "억 ";
+            if (man > 0) korStr += man.toLocaleString() + "만 ";
+            if (!korStr) return fullNumStr;
+            return `${fullNumStr} (${isNegative ? '손실 ' : ''}${korStr.trim()} 원)`;
+        }
+
+        function handleInput(el) {
+            el.value = formatWithComma(el.value);
+            updateAnalysis();
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('analysisChart').getContext('2d');
+            mainChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['매출액', '영업이익', '이익률(%)', '자산', '부채'],
+                    datasets: [{
+                        label: '재무 지표',
+                        data: [0, 0, 0, 0, 0],
+                        backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444'],
+                        borderRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: false, grid: { color: '#f1f5f9' } } }
+                }
+            });
+        }
+
+        function updateAnalysis() {
+            const parseVal = (id) => {
+                const val = document.getElementById(id).value.replace(/,/g, "");
+                if (val === "" || val === "-") return 0;
+                return parseFloat(val);
+            };
+
+            const rev = parseVal('in_rev_2023');
+            const pft = parseVal('in_pft_2023');
+            const debt = parseVal('in_debt');
+            const equity = parseVal('in_equity');
+            const suspense = parseVal('in_suspense');
+
+            document.getElementById('txt_rev_2023').innerText = formatCombinedUnit(rev);
+            document.getElementById('txt_pft_2023').innerText = formatCombinedUnit(pft);
+            document.getElementById('txt_debt').innerText = formatCombinedUnit(debt);
+            document.getElementById('txt_equity').innerText = formatCombinedUnit(equity);
+            document.getElementById('txt_suspense').innerText = formatCombinedUnit(suspense);
+
+            const debtRatio = equity <= 0 ? 999 : (debt / equity * 100).toFixed(1);
+            const margin = rev > 0 ? (pft / rev * 100).toFixed(1) : (rev === 0 && pft < 0 ? -100 : 0);
+
+            if (mainChartInstance) {
+                mainChartInstance.data.datasets[0].data = [rev/100000000, pft/100000000, parseFloat(margin), equity/100000000, debt/100000000];
+                mainChartInstance.update();
+            }
+
+            document.getElementById('v_debt_txt').innerText = equity <= 0 ? "자본잠식" : debtRatio + "%";
+            document.getElementById('v_debt_bar').style.width = equity <= 0 ? "100%" : Math.min(debtRatio/5, 100) + "%";
+            document.getElementById('v_margin_txt').innerText = margin + "%";
+            document.getElementById('v_margin_bar').style.width = Math.max(0, Math.min(margin*5, 100)) + "%";
+
+            const r_risk = document.getElementById('report_risk');
+            const r_margin = document.getElementById('report_margin');
+            const r_cash = document.getElementById('report_cash');
+            const r_advice = document.getElementById('report_advice');
+            const i_risk = document.getElementById('icon_risk');
+            const i_margin = document.getElementById('icon_margin');
+
+            if (equity <= 0) {
+                r_risk.innerText = "현재 완전 자본잠식 상태입니다. 법인 청산 리스크 혹은 대규모 자본 확충이 시급합니다.";
+                i_risk.className = "w-10 h-10 rounded-xl bg-rose-600 flex-shrink-0 flex items-center justify-center text-lg font-bold";
+            } else if (debtRatio > 300) {
+                r_risk.innerText = `부채비율(${debtRatio}%)이 매우 높습니다. 재무 건전성 확보 전략이 최우선입니다.`;
+                i_risk.className = "w-10 h-10 rounded-xl bg-rose-600 flex-shrink-0 flex items-center justify-center text-lg font-bold";
+            } else {
+                r_risk.innerText = `현재 부채비율(${debtRatio}%)은 안정적입니다.`;
+                i_risk.className = "w-10 h-10 rounded-xl bg-emerald-500 flex-shrink-0 flex items-center justify-center text-lg font-bold";
+            }
+
+            if (margin < 0) {
+                r_margin.innerText = `현재 영업손실 구간입니다. 수익 구조 개선이 시급합니다.`;
+                i_margin.className = "w-10 h-10 rounded-xl bg-rose-600 flex-shrink-0 flex items-center justify-center text-lg font-bold";
+            } else {
+                r_margin.innerText = `영업이익률 ${margin}%로 수익성을 유지 중입니다.`;
+                i_margin.className = "w-10 h-10 rounded-xl bg-emerald-500 flex-shrink-0 flex items-center justify-center text-lg font-bold";
+            }
+
+            r_cash.innerText = suspense > 100000000 ? "가지급금 규모가 커 세무 리스크가 높습니다. 조기 정리가 필요합니다." : "가지급금 세무 리스크가 안정권에 있습니다.";
+
+            if (margin > 15 && debtRatio < 100) {
+                r_advice.innerText = `매우 우수한 재무 구조를 바탕으로 가업 승계나 기업 공개(IPO)를 본격적으로 준비할 수 있습니다.`;
+            } else if (margin < 5) {
+                r_advice.innerText = `수익성 회복을 위한 원가 분석 컨설팅과 정부 지원 사업을 통한 자금 확보를 제언합니다.`;
+            } else {
+                r_advice.innerText = `안정적 성장을 위해 이익잉여금의 효율적 관리와 법인 가치 극대화 전략이 필요합니다.`;
+            }
+        }
+
+        window.onload = function() {
+            initChart();
+            updateAnalysis();
+            ScrollReveal().reveal('.reveal', { distance: '40px', duration: 800, easing: 'ease-out', interval: 100, origin: 'bottom' });
+        };
+    </script>
+</body>
+</html>
